@@ -1,0 +1,43 @@
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+      - HDFS_CONF_dfs_permissions_enabled=false
+      - HDFS_CONF_dfs_safemode_threshold_pct=0
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870
+      - HDFS_CONF_dfs_permissions_enabled=false
+    depends_on:
+      - namenode
+  
+  pig-client:
+    build:
+      context: .
+      dockerfile: Dockerfile-pig
+    container_name: pig-client
+    volumes:
+      - ./scripts:/app/scripts
+      - ./data:/app/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    depends_on:
+      - namenode
+      - datanode
+    command: tail -f /dev/null
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:

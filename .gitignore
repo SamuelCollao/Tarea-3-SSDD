@@ -1,0 +1,4 @@
+.env
+data/test.csv
+data/yahoo.csv
+data/llm.csv

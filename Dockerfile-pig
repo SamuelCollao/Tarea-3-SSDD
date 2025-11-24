@@ -1,0 +1,22 @@
+FROM bde2020/hadoop-base:2.0.0-hadoop3.2.1-java8
+
+
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
+
+
+RUN apt-get -o Acquire::Check-Valid-Until=false update && \
+    apt-get install -y python3 wget
+
+
+ENV PIG_VERSION=0.17.0
+RUN wget https://archive.apache.org/dist/pig/pig-$PIG_VERSION/pig-$PIG_VERSION.tar.gz && \
+    tar -xzvf pig-$PIG_VERSION.tar.gz -C /usr/local/ && \
+    mv /usr/local/pig-$PIG_VERSION /usr/local/pig && \
+    rm pig-$PIG_VERSION.tar.gz
+
+ENV PATH=$PATH:/usr/local/pig/bin
+ENV PIG_HOME=/usr/local/pig
+ENV PIG_CLASSPATH=$HADOOP_CONF_DIR
+
+WORKDIR /app
